@@ -30,6 +30,10 @@ variable "project_name" {
   default     = "hcp-terraform-handson"
 }
 
+variable "environment" {
+  description = "Environment name (dev, prod)"
+  type        = string
+}
 
 # VPC作成
 resource "aws_vpc" "main" {
@@ -38,7 +42,7 @@ resource "aws_vpc" "main" {
   enable_dns_support   = true
 
   tags = {
-    Name = "${var.project_name}-vpc"
+    Name = "${var.project_name}-${var.environment}-vpc"
   }
 }
 
@@ -47,7 +51,7 @@ resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
 
   tags = {
-    Name = "${var.project_name}-igw"
+    Name = "${var.project_name}-${var.environment}-igw"
   }
 }
 
@@ -59,7 +63,7 @@ resource "aws_subnet" "public_1" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "${var.project_name}-public-subnet-1"
+    Name = "${var.project_name}-${var.environment}-public-subnet-1"
     Type = "Public"
   }
 }
@@ -72,7 +76,7 @@ resource "aws_subnet" "public_2" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "${var.project_name}-public-subnet-2"
+    Name = "${var.project_name}-${var.environment}-public-subnet-2"
     Type = "Public"
   }
 }
@@ -87,7 +91,7 @@ resource "aws_route_table" "main" {
   }
 
   tags = {
-    Name = "${var.project_name}-main-rt"
+    Name = "${var.project_name}-${var.environment}-main-rt"
   }
 }
 
@@ -153,7 +157,7 @@ resource "aws_security_group" "ec2_sg" {
   }
 
   tags = {
-    Name = "${var.project_name}-ec2-sg"
+    Name = "${var.project_name}-${var.environment}-ec2-sg"
   }
 }
 
@@ -166,7 +170,7 @@ resource "aws_instance" "public_1" {
   user_data              = base64encode(local.nginx_userdata_1)
 
   tags = {
-    Name = "${var.project_name}-ec2-public-1"
+    Name = "${var.project_name}-${var.environment}-ec2-public-1"
   }
 }
 
@@ -179,7 +183,7 @@ resource "aws_instance" "public_2" {
   user_data              = base64encode(local.nginx_userdata_2)
 
   tags = {
-    Name = "${var.project_name}-ec2-public-2"
+    Name = "${var.project_name}-${var.environment}-ec2-public-2"
   }
 }
 
@@ -239,13 +243,13 @@ resource "aws_security_group" "alb_sg" {
   }
 
   tags = {
-    Name = "${var.project_name}-alb-sg"
+    Name = "${var.project_name}-${var.environment}-alb-sg"
   }
 }
 
 # Application Load Balancer
 resource "aws_lb" "main" {
-  name               = "${var.project_name}-alb"
+  name               = "${var.project_name}-${var.environment}-alb"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb_sg.id]
@@ -254,13 +258,13 @@ resource "aws_lb" "main" {
   enable_deletion_protection = false
 
   tags = {
-    Name = "${var.project_name}-alb"
+    Name = "${var.project_name}-${var.environment}-alb"
   }
 }
 
 # ターゲットグループ
 resource "aws_lb_target_group" "main" {
-  name     = "${var.project_name}-tg"
+  name     = "${var.project_name}-${var.environment}-tg"
   port     = 80
   protocol = "HTTP"
   vpc_id   = aws_vpc.main.id
@@ -278,7 +282,7 @@ resource "aws_lb_target_group" "main" {
   }
 
   tags = {
-    Name = "${var.project_name}-tg"
+    Name = "${var.project_name}-${var.environment}-tg"
   }
 }
 
