@@ -33,6 +33,7 @@ variable "project_name" {
 variable "environment" {
   description = "Environment name (dev, prod)"
   type        = string
+  default     = "dev"
 }
 
 # VPC作成
